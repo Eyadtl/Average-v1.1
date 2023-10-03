@@ -183,9 +183,11 @@ const video = (arr) => {
 
 // // Assuming handleChannelSelect() returns an array of video IDs.
 
-
+const loader1=document.querySelector(".lds-dual-ring")
 const content = document.querySelector(".one")
 avg.addEventListener("click", () => {
+    const existingAverage = document.querySelector("h1");
+    loader1.style="display:inline"
     ids(handleChannelSelect())
         .then(data => video(data))
         .then(filteredVideoIds => {
@@ -202,7 +204,7 @@ avg.addEventListener("click", () => {
             };
             const calculateAverageViews = async (videoIds) => {
                 let totalViews = 0;
-                const existingAverage = document.querySelector("h1");
+
                 if (existingAverage) {
                     existingAverage.remove();
                 }
@@ -217,6 +219,7 @@ avg.addEventListener("click", () => {
                 average.innerHTML = Math.round(averageViews);
                 // content.appendChild(average)
                 // average.innerHTML = Math.round(averageViews);
+                loader1.style="display:none"
             };
 
             calculateAverageViews(filteredVideoIds);
@@ -371,10 +374,11 @@ const video2 = (arr) => {
 
 
 const avg2 = document.querySelector(".avg_url")
-
 const content2 = document.querySelector(".two")
+const loader2=document.querySelector(".lds-dual-ring2")
 
 avg2.addEventListener("click", async () => {
+    loader2.style="display:inline"
     try {
         // Wait for the test() function to complete
         await test();
@@ -414,6 +418,7 @@ avg2.addEventListener("click", async () => {
             content2.appendChild(average);
             console.log(average)
             average.innerHTML = Math.round(averageViews);
+            loader2.style="display:none"
         };
         calculateAverageViews(filteredVideoIds);
         console.log(filteredVideoIds);
