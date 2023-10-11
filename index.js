@@ -220,6 +220,9 @@ avg.addEventListener("click", () => {
                 // content.appendChild(average)
                 // average.innerHTML = Math.round(averageViews);
                 loader1.style="display:none"
+                            if(isNaN(averageViews)){
+                average.innerHTML="No content published in this time frame.Try changing time frame."
+            }
             };
 
             calculateAverageViews(filteredVideoIds);
@@ -419,6 +422,9 @@ avg2.addEventListener("click", async () => {
             console.log(average)
             average.innerHTML = Math.round(averageViews);
             loader2.style="display:none"
+                        if(isNaN(averageViews)){
+                average.innerHTML="No content published in this time frame.Try changing time frame."
+            }
         };
         calculateAverageViews(filteredVideoIds);
         console.log(filteredVideoIds);
