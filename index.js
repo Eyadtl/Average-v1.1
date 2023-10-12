@@ -214,11 +214,10 @@ avg.addEventListener("click", () => {
                     const views = await fetchVideoData(video_id);
                     totalViews += views;
                 }
-                const averageViews = totalViews / videoIds.length;
+                const averageViews = Math.round(totalViews / videoIds.length);
                 content.appendChild(average);
-                average.innerHTML = Math.round(averageViews);
-                // content.appendChild(average)
                 // average.innerHTML = Math.round(averageViews);
+                average.innerHTML = averageViews.toLocaleString('en-US');
                 loader1.style="display:none"
                             if(isNaN(averageViews)){
                 average.innerHTML="No content published in this time frame.Try changing time frame."
@@ -417,10 +416,10 @@ avg2.addEventListener("click", async () => {
             // if (isNaN(views_f)) {
             //     console.log("there is no videos")
             // }
-            const averageViews = totalViews / videoIds.length;
+            const averageViews =Math.round(totalViews / videoIds.length);
             content2.appendChild(average);
             console.log(average)
-            average.innerHTML = Math.round(averageViews);
+            average.innerHTML = averageViews.toLocaleString('en-US');
             loader2.style="display:none"
                         if(isNaN(averageViews)){
                 average.innerHTML="No content published in this time frame.Try changing time frame."
