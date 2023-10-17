@@ -66,71 +66,60 @@ function parseYouTubeDurationToMilliseconds(duration) {
     const totalMilliseconds = hours * 3600000 + minutes * 60000 + seconds * 1000;
     return totalMilliseconds;
 }
-
-
-var PLAYLIST = ""
-let ids = () => {
-    return new Promise((resolve, reject) => {
         // https://www.googleapis.com/youtube/v3/playlistItems?part=snippet&playlistId={PLAYLIST_ID}&maxResults=50&key={API_KEY}'
         // https://www.googleapis.com/youtube/v3/search?part=snippet&channelId=${youtube}&key=${api_key}&maxResults=15&order=date
-        resolve(fetch(`https://www.googleapis.com/youtube/v3/playlistItems?part=snippet&playlistId=${PLAYLIST}&maxResults=50&key=${api_key}`)
-            .then(response => {
-                return response.json();
-            })
-            .then(data => {
-                // var arr = [];
-                // var month1 = document.querySelector(".months1")
-                // // const today = new Date();
-                // // today.setMonth(today.getMonth() - 1)
-                // // var dateString = today.getFullYear() + "-" + "0" + (today.getMonth() + 1) + "-" + today.getDate() + "T00:00:00Z";
-                // console.log(data)
-                // // console.log(dateString)
-                // const today = new Date();
-                // today.setMonth(today.getMonth() - month1.value);
-                // const dateString = today.toISOString(); // This gives you the formatted date string
-                // console.log(dateString)
 
-                // // "2023-07-01T11:18:56Z"
-                // for (var i = 0; i < data.items.length; i++) {
-                //     if (data.items[i].snippet.publishedAt > dateString /*"2023-07-08T00:00:00Z"/*today.getFullYear() + "-" + 0 + today.getMonth() + "-" + today.getDay()*/) {
-                //         arr.push(data.items[i].snippet.resourceId.videoId);
-                //         console.log(data.items[i].snippet.title + data.items[i].snippet.resourceId.videoId)
-                //     }
-                    
+var PLAYLIST = ""
+let ids = async () => {
+    const month1 = document.querySelector(".months1").value;
+    const today = new Date();
+    today.setMonth(today.getMonth() - month1);
+    const dateString = today.toISOString();
+    const yesterday = new Date();
+    yesterday.setDate(yesterday.getDate() - 1);
+    const yesterdayString = yesterday.toISOString();
+    let allVideoIds = [];
+    let pageCounter = 0; // Counter for the number of pages fetched
 
-                // }
-                //////////////////
-                var arr = [];
-var month1 = document.querySelector(".months1")
-const today = new Date();
-today.setMonth(today.getMonth() - month1.value);
-const dateString = today.toISOString(); // This gives you the formatted date string
-console.log(dateString)
+    const fetchVideos = async (pageToken) => {
+        const response = await fetch(`https://www.googleapis.com/youtube/v3/playlistItems?part=snippet&playlistId=${PLAYLIST}&maxResults=50&key=${api_key}&pageToken=${pageToken}`);
+        const data = await response.json();
+        return data;
+    };
 
-// Subtract 24 hours from the current date
-const yesterday = new Date();
-yesterday.setDate(yesterday.getDate() - 1);
-const yesterdayString = yesterday.toISOString();
+    const fetchVideosRecursively = async (pageToken) => {
+        const data = await fetchVideos(pageToken);
 
-for (var i = 0; i < data.items.length; i++) {
-    if (data.items[i].snippet.publishedAt > dateString && data.items[i].snippet.publishedAt < yesterdayString) {
-        arr.push(data.items[i].snippet.resourceId.videoId);
-        console.log(data.items[i].snippet.title + data.items[i].snippet.resourceId.videoId)
+        data.items.forEach(item => {
+            if (item.snippet.publishedAt > dateString && item.snippet.publishedAt < yesterdayString) {
+                allVideoIds.push(item.snippet.resourceId.videoId);
+                console.log(item.snippet.title + item.snippet.resourceId.videoId);
+            }
+        });
+
+        pageCounter++; // Increment the page counter
+
+        // Check if there are more pages to fetch and if we have fetched three pages
+        if (data.nextPageToken && pageCounter < 4) { // Fetch only 3 pages
+            console.log(`Fetching page ${pageCounter + 1}`);
+            // Fetch the next page of results recursively
+            await fetchVideosRecursively(data.nextPageToken);
+        } else {
+            console.log("Finished fetching 4 pages.");
+        }
+    };
+    try {
+        // Start fetching videos from the first page
+        console.log("Fetching page 1");
+        await fetchVideosRecursively('');
+        const filteredVideoIds = await video(allVideoIds);
+        return filteredVideoIds;
+    } catch (error) {
+        console.error(error);
+        throw new Error("Error fetching and processing data");
     }
-}
+};
 
-
-                console.log(arr);
-                return arr; // Return the array of video IDs to continue the promise chain.
-            })
-            .then(videoIds => {
-                // Now we can call the video function to filter video IDs based on duration.
-                console.log(videoIds)
-                return video(videoIds);
-            })
-        )
-    });
-}
 
 // const best = document.querySelector(".test")
 // best.addEventListener("click", () => {
@@ -219,9 +208,9 @@ avg.addEventListener("click", () => {
                 // average.innerHTML = Math.round(averageViews);
                 average.innerHTML = averageViews.toLocaleString('en-US');
                 loader1.style="display:none"
-                            if(isNaN(averageViews)){
-                average.innerHTML="No content published in this time frame.Try changing time frame."
-            }
+                if(isNaN(averageViews)){
+                    average.innerHTML="No content published in this time frame.Try changing time frame."
+                }
             };
 
             calculateAverageViews(filteredVideoIds);
@@ -288,47 +277,53 @@ let test = () => {
 };
 
 
-let ids2 = () => {
-    return new Promise((resolve, reject) => {
-        // https://www.googleapis.com/youtube/v3/playlistItems?part=snippet&playlistId={PLAYLIST_ID}&maxResults=50&key={API_KEY}'
-        // https://www.googleapis.com/youtube/v3/search?part=snippet&channelId=${youtube}&key=${api_key}&maxResults=15&order=date
-        resolve(fetch(`https://www.googleapis.com/youtube/v3/playlistItems?part=snippet&playlistId=${PLAYLIST_ID2}&maxResults=50&key=${api_key}`)
-            .then(response => {
-                return response.json();
-            })
-            .then(data => {
-                console.log('ids2')
-                var arr = [];
-                var month1 = document.querySelector(".months1")
-                const today = new Date();
-                today.setMonth(today.getMonth() - month1.value);
-                const dateString = today.toISOString(); // This gives you the formatted date string
-                console.log(dateString)
-                
-                // Subtract 24 hours from the current date
-                const yesterday = new Date();
-                yesterday.setDate(yesterday.getDate() - 1);
-                const yesterdayString = yesterday.toISOString();
-                
-                for (var i = 0; i < data.items.length; i++) {
-                    if (data.items[i].snippet.publishedAt > dateString && data.items[i].snippet.publishedAt < yesterdayString) {
-                        arr.push(data.items[i].snippet.resourceId.videoId);
-                        console.log(data.items[i].snippet.title + data.items[i].snippet.resourceId.videoId)
-                    }
-                }
-                
+let ids2 = async () => {
+    try {
+        const month1 = document.querySelector(".months1").value;
+        const today = new Date();
+        today.setMonth(today.getMonth() - month1);
+        const dateString = today.toISOString();
+        
+        const yesterday = new Date();
+        yesterday.setDate(yesterday.getDate() - 1);
+        const yesterdayString = yesterday.toISOString();
+        
+        let allVideoIds = [];
 
-                console.log(arr);
-                return arr; // Return the array of video IDs to continue the promise chain.
-            })
-            .then(videoIds => {
-                // Now we can call the video function to filter video IDs based on duration.
-                console.log(videoIds)
-                return video2(videoIds);
-            })
-        )
-    });
-}
+        let pageToken = ''; // Initialize pageToken variable
+
+        for (let page = 1; page <= 4; page++) { // Fetch 4 pages
+            const response = await fetch(`https://www.googleapis.com/youtube/v3/playlistItems?part=snippet&playlistId=${PLAYLIST_ID2}&maxResults=50&pageToken=${pageToken}&key=${api_key}`);
+            const data = await response.json();
+
+            console.log(`Fetching page ${page}`);
+            const videoIds = data.items
+                .filter(item => item.snippet.publishedAt > dateString && item.snippet.publishedAt < yesterdayString)
+                .map(item => {
+                    console.log(item.snippet.title + item.snippet.resourceId.videoId);
+                    return item.snippet.resourceId.videoId;
+                });
+
+            allVideoIds = allVideoIds.concat(videoIds);
+
+            if (!data.nextPageToken) {
+                break; // No more pages to fetch
+            }
+
+            pageToken = data.nextPageToken; // Update the pageToken for the next iteration
+        }
+
+        const filteredVideoIds = await video2(allVideoIds);
+        console.log(filteredVideoIds);
+        return filteredVideoIds;
+    } catch (error) {
+        console.error(error);
+        throw new Error("Error fetching and processing data");
+    }
+};
+
+
+
 const box2 = document.querySelector(".box2")
 var short = 90000;
 var long = 3600000;
@@ -421,7 +416,7 @@ avg2.addEventListener("click", async () => {
             console.log(average)
             average.innerHTML = averageViews.toLocaleString('en-US');
             loader2.style="display:none"
-                        if(isNaN(averageViews)){
+            if(isNaN(averageViews)){
                 average.innerHTML="No content published in this time frame.Try changing time frame."
             }
         };
@@ -433,4 +428,45 @@ avg2.addEventListener("click", async () => {
 });
 
 
+///////////////////////third tab////////////////
 
+var number_of_videos = document.querySelector(".videos");
+var enter = document.querySelector(".enter");
+var arr = [];
+
+
+enter.addEventListener("click", () => {
+    var inputs = [];
+
+    for (var i = 0; i < parseInt(number_of_videos.value); i++) {
+        const input = document.createElement("input");
+        input.classList.add("input" + i);
+        document.querySelector(".container1").appendChild(input);
+        inputs.push(input); // Store the input elements in an array
+    }
+    var refresh = document.querySelector(".refresh");
+    refresh.addEventListener("click", () => {
+        // window.location.reload();
+        for (var t = 0; t < parseInt(number_of_videos.value); t++) {
+            document.querySelector(`.input${t}`).remove()
+        }
+        document.querySelector(".press").remove()
+        document.querySelector("h2").remove()
+
+    })
+    console.log(inputs)
+    var button = document.createElement("button");
+    button.innerHTML = "calculate";
+    document.querySelector(".container1").appendChild(button)
+    button.classList.add("press");
+
+    button.addEventListener("click", () => {
+        var values = inputs.map((input) => input.value); // Retrieve the values of the input fields
+        var sum = values.reduce((acc, curr) => acc + parseInt(curr), 0);
+        console.log(values)
+        // console.log(sum / number_of_videos.value)
+        const theAVREGE = document.createElement("h2");
+        document.querySelector(".container1").appendChild(theAVREGE)
+        theAVREGE.innerText = "The average is " + Math.round((sum / number_of_videos.value))
+    });
+});
